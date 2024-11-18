@@ -185,7 +185,7 @@ var openai = await new RagSharpOpenAIChat(new Settings
     .AddTool(typeof(Onboarding))
     .AddTool(typeof(Util))
     .Build()
-    .CreateAsync<List<Users>>(new RagSharpOpenAIChatMessages
+    .CreateAsync<Users>(new RagSharpOpenAIChatMessages
     {
         Strict = true,// This tell RagSharp to make the final output strict
         AdditionalProperties = false, // This tell RagSharp to add more property to the final out, if set to true strict must be false
