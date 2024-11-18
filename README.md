@@ -185,7 +185,7 @@ var openai = await new RagSharpOpenAIChat(new Settings
     .AddTool(typeof(Onboarding))
     .AddTool(typeof(Util))
     .Build()
-    .CreateAsync<Users>(new RagSharpOpenAIChatMessages
+    .CreateAsync<List<Users>>(new RagSharpOpenAIChatMessages
     {
         Strict = true,// This tell RagSharp to make the final output strict
         AdditionalProperties = false, // This tell RagSharp to add more property to the final out, if set to true strict must be false
@@ -287,6 +287,7 @@ void OnCustomEvent(LLMEvent customEvent)
 ```
 
 In this example, the `OnCustomEvent` method will handle the `LLMEvent` whenever it is triggered. This allows you to react to events in real time and log or modify behavior accordingly.
+
 ---
 
 [LinkedIn Profile](https://www.linkedin.com/in/oscar-itaba-4b5107a0/)
