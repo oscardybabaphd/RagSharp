@@ -4,7 +4,27 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Title>RagSharp</Title>
+    <Description>Turns your application or existing methods into RAG-ready functions, enabling LLMs to help execute your code and make your application smarter.</Description>
+    <Copyright>2024</Copyright>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/oscardybabaphd/RagSharp</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>LLM;RAG;OpenAI</PackageTags>
+    <PackageLicenseFile>MIT License.md</PackageLicenseFile>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\..\..\Desktop\MIT License.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
