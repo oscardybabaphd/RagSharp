@@ -172,7 +172,7 @@ The RagSharp library also provides methods to initialize an instance and interac
 
 - **`AddTool(Type T)`**: Adds a tool (class) to the RagSharp instance. The tool can be a static, instance, or generic class, and multiple tools can be added by calling `AddTool` multiple times.
 - **`Build()`**: Verifies if at least one tool has been added to the instance.
-- **`CreateAsync<T>()`**\*\* or \*\*\*\*`CreateAsync()`\*\*: Creates a new interaction with the LLM. The generic version (`CreateAsync<T>`) deserializes the response from the LLM to the specified type `T`, while the non-generic version returns the raw LLM response as a text string.
+- **`CreateAsync<T>()`**  or **`CreateAsync()`**: Creates a new interaction with the LLM. The generic version (`CreateAsync<T>`) deserializes the response from the LLM to the specified type `T`, while the non-generic version returns the raw LLM response as a text string.
 
 ### Usage Example
 
@@ -287,13 +287,6 @@ void OnCustomEvent(LLMEvent customEvent)
 ```
 
 In this example, the `OnCustomEvent` method will handle the `LLMEvent` whenever it is triggered. This allows you to react to events in real time and log or modify behavior accordingly.
-### Summary
-
-1. **AddTool(Type T)**: Adds a class (tool) to the RagSharp instance for LLM interaction.
-2. **Build()**: Confirms that at least one tool has been added before proceeding.
-3. **CreateAsync**\*\*()\*\*: Starts an LLM interaction, returning a deserialized response of type `T`.
-4. **CreateAsync()**: Starts an LLM interaction, returning the raw response as text.
-
 ---
 
 [LinkedIn Profile](https://www.linkedin.com/in/oscar-itaba-4b5107a0/)
