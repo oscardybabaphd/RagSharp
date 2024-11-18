@@ -2,6 +2,14 @@
 
 Turns your application or existing methods into RAG-ready functions, enabling LLMs to help execute your code and make your application smarter.
 
+## Installation
+
+To include RagSharp in your project, use the following command:
+
+```sh
+ dotnet add package RagSharpLib --version 1.0.0
+```
+
 # RagSharpPropertyAttribute and RagSharpToolAttribute
 
 The `RagSharpPropertyAttribute` and `RagSharpToolAttribute` are custom attributes in the RagSharp library, designed to enrich function schemas for retrieval-augmented generation (RAG) purposes. These attributes help define metadata for the properties and methods used within the library, thereby allowing for more informative and controlled behavior when using the OpenAI API to turn C# methods into RAG-ready functions.
