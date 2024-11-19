@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RagSharpLib.OpenAI;
 using System;
@@ -10,8 +11,10 @@ namespace RagSharpLib.Common
 {
     internal static class ToolCallExecution
     {
-        public static async Task<dynamic> ExecuteAsync(this ToolCall toolCall, List<ClassType> classTypes)
+        private static IServiceProvider _serviceProvider { get; set; }
+        public static async Task<dynamic> ExecuteAsync(this ToolCall toolCall, List<ClassType> classTypes, IServiceProvider serviceProvider)
         {
+            _serviceProvider = serviceProvider;
             foreach (var item in classTypes)
             {
                 var method = item.Type.GetMethod(toolCall.Function.Name);
@@ -108,7 +111,26 @@ namespace RagSharpLib.Common
         {
             try
             {
-                var instance = !item.IsStatic ? Activator.CreateInstance(item.Type) : null;
+                object instance = null;
+                if (!item.IsStatic)
+                {
+                    var constructor = item.Type.GetConstructors().FirstOrDefault();
+                    if (constructor != null && constructor.GetParameters().Length == 0)
+                    {
+                        // If there is a parameterless constructor, create an instance directly
+                        instance = Activator.CreateInstance(item.Type);
+                    }
+                    else
+                    {
+                        if (_serviceProvider == null)
+                            throw new InvalidOperationException("Service provider cannot be null for for an instance type with one or constructor ");
+                        // Use the existing service provider to resolve dependencies if registered
+                        var service = _serviceProvider?.GetService(item.Type);
+                        if (service == null)
+                            throw new InvalidOperationException($"Unable to locate service container of type '{item.Type.Name}'");
+                        instance = service;
+                    }
+                }
                 var result = method.Invoke(instance, (args != null) ? args : null);
 
                 if (result is Task task)

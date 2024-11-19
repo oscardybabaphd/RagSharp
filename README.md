@@ -2,11 +2,19 @@
 
 Turns your application or existing methods into RAG-ready functions, enabling LLMs to help execute your code and make your application smarter.
 
+## Installation
+
+To include RagSharp in your project, use the following command:
+
+```sh
+ dotnet add package RagSharpLib --version 1.0.0
+```
 # RagSharpPropertyAttribute and RagSharpToolAttribute
 
 The `RagSharpPropertyAttribute` and `RagSharpToolAttribute` are custom attributes in the RagSharp library, designed to enrich function schemas for retrieval-augmented generation (RAG) purposes. These attributes help define metadata for the properties and methods used within the library, thereby allowing for more informative and controlled behavior when using the OpenAI API to turn C# methods into RAG-ready functions.
 
 ## RagSharpPropertyAttribute
+
 
 ### Namespace
 
@@ -171,7 +179,7 @@ The RagSharp library also provides methods to initialize an instance and interac
 ### Methods for Initializing RagSharp
 
 - **`AddTool(Type T)`**: Adds a tool (class) to the RagSharp instance. The tool can be a static, instance, or generic class, and multiple tools can be added by calling `AddTool` multiple times.
-- **`Build()`**: Verifies if at least one tool has been added to the instance.
+- **`Build(IServiceProvider service)`**: Verifies if at least one tool has been added to the instance with an optional parameter to load class dependency.
 - **`CreateAsync<T>()`**  or **`CreateAsync()`**: Creates a new interaction with the LLM. The generic version (`CreateAsync<T>`) deserializes the response from the LLM to the specified type `T`, while the non-generic version returns the raw LLM response as a text string.
 
 ### Usage Example
@@ -184,7 +192,7 @@ var openai = await new RagSharpOpenAIChat(new Settings
 })
     .AddTool(typeof(Onboarding))
     .AddTool(typeof(Util))
-    .Build()
+    .Build(serviceProvider) // serviceProvider is optional for constructorless type, but if one or more tool has constructor you should provide serviceProvider
     .CreateAsync<Users>(new RagSharpOpenAIChatMessages
     {
         Strict = true,// This tell RagSharp to make the final output strict

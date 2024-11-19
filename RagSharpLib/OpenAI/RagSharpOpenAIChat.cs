@@ -16,7 +16,7 @@ namespace RagSharpLib.OpenAI
     public interface IOpenAIChatBuilder
     {
         IOpenAIChatBuilder AddTool(Type type);
-        IOpenAIChatClient Build();
+        IOpenAIChatClient Build(IServiceProvider serviceProvider = null);
     }
 
     // Interface for the OpenAI chat client
@@ -32,6 +32,7 @@ namespace RagSharpLib.OpenAI
     {
         private readonly Settings _settings;
         private readonly List<ClassType> _tools = new List<ClassType>();
+
 
         public RagSharpOpenAIChat(Settings settings)
         {
@@ -52,12 +53,12 @@ namespace RagSharpLib.OpenAI
             return this;
         }
 
-        public IOpenAIChatClient Build()
+        public IOpenAIChatClient Build(IServiceProvider serviceProvider = null)
         {
             if (_tools.Count == 0)
                 throw new InvalidOperationException("No tool added. Please add at least one tool before building the client.");
 
-            return new RagSharpOpenAIChatClient(_settings, _tools);
+            return new RagSharpOpenAIChatClient(_settings, _tools, serviceProvider);
         }
     }
 
@@ -69,10 +70,12 @@ namespace RagSharpLib.OpenAI
         private readonly List<ClassType> _tools;
         private bool logModelEvent { get; set; }
         private List<dynamic> methodCallResults = new List<dynamic>();
-        public RagSharpOpenAIChatClient(Settings settings, List<ClassType> tools)
+        private readonly IServiceProvider _serviceProvider;
+        public RagSharpOpenAIChatClient(Settings settings, List<ClassType> tools, IServiceProvider serviceProvider)
         {
             _settings = settings;
             _tools = tools;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task<ToolCallResponse<T>> CreateAsync<T>(RagSharpOpenAIChatMessages messages) where T : class
@@ -80,7 +83,7 @@ namespace RagSharpLib.OpenAI
             if (typeof(T).IsGenericType && typeof(T).GetGenericTypeDefinition() == typeof(List<>))
                 throw new NotSupportedException("RagSharp does not support Collection since OpenAI doesn't support direct collection response.");
             logModelEvent = messages.LogModelEvent;
-            var schema = new AttributeParser().GenerateToolSchema(_tools);
+            var schema = new AttributeParser().GenerateToolSchema(_tools, _serviceProvider);
             dynamic toolChoice = schema.ToolChoice == null ? "auto" : new
             {
                 type = "function",
@@ -142,7 +145,7 @@ namespace RagSharpLib.OpenAI
 
         public async Task<string> GetSchemaAsync()
         {
-            var schema = new AttributeParser().GenerateToolSchema(_tools);
+            var schema = new AttributeParser().GenerateToolSchema(_tools, _serviceProvider);
             var settings = new JsonSerializerSettings
             {
                 NullValueHandling = NullValueHandling.Ignore
@@ -181,7 +184,7 @@ namespace RagSharpLib.OpenAI
 
                 foreach (var toolCall in response.Choices[0].Message.ToolCalls)
                 {
-                    var result = await toolCall.ExecuteAsync(_tools);
+                    var result = await toolCall.ExecuteAsync(_tools, _serviceProvider);
                     var _message = new Messages
                     {
                         Role = "tool",

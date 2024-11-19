@@ -1,4 +1,5 @@
 ﻿using EventBroadcasting;
+using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RagSharpLib.EventHandler;
@@ -9,14 +10,14 @@ namespace RagSharpLib.Attributes
 {
     internal class AttributeParser
     {
-        public (List<ToolFunctionSchema> ToolFunctions, string ToolChoice) GenerateToolSchema(List<ClassType> classList)
+        public (List<ToolFunctionSchema> ToolFunctions, string ToolChoice) GenerateToolSchema(List<ClassType> classList, IServiceProvider serviceProvider)
         {
             var toolFunctions = new List<ToolFunctionSchema>();
             string choice = null;
 
             foreach (var obj in classList)
             {
-                Type type = GetClassType(obj);
+                Type type = GetClassType(obj, serviceProvider);
 
                 var methods = type.GetMethods()
                     .Where(method => method.IsDefined(typeof(RagSharpToolAttribute), false))
@@ -61,13 +62,42 @@ namespace RagSharpLib.Attributes
                     toolFunctions.Add(toolFunctionSchema);
                 }
             }
-            
+
             return (toolFunctions, choice);
         }
 
-        private Type GetClassType(ClassType classType)
+        private Type GetClassType(ClassType classType, IServiceProvider serviceProvider)
         {
-            return classType.IsStatic ? classType.Type : Activator.CreateInstance(classType.Type).GetType();
+            try
+            {
+                if (!classType.IsStatic)
+                {
+                    object instance = null;
+                    var constructor = classType.Type.GetConstructors().FirstOrDefault();
+                    if (constructor != null && constructor.GetParameters().Length == 0)
+                    {
+                        // If there is a parameterless constructor, create an instance directly
+                        instance = Activator.CreateInstance(classType.Type);
+                    }
+                    else
+                    {
+                        if (serviceProvider == null)
+                            throw new InvalidOperationException("Service provider cannot be null for for an instance type with one or constructor ");
+                        // Use the existing service provider to resolve dependencies if registered
+                        var service = serviceProvider?.GetService(classType.Type);
+                        if (service == null)
+                            throw new InvalidOperationException($"Unable to locate service container of type '{classType.Type.Name}'");
+                        instance = service;
+                    }
+                    return instance.GetType();
+                }
+                return classType.Type;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+            //return classType.IsStatic ? classType.Type : Activator.CreateInstance(classType.Type).GetType();
         }
 
         private (Dictionary<string, PropertyDefinition> Properties, string[] RequiredPropNames) GetMethodParameter(MethodInfo methodInfo)
